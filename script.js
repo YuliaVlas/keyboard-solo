@@ -1,4 +1,4 @@
-const words = ["apple", "banana", "cherry", "grape", "kiwi"];
+const words = ["apple", "banana", "cherry", "grape", "kiwi", "egg", "milk"];
 const wordContainer = document.querySelector('.word');
 const timerElement = document.getElementById('timer');
 const timeArray = timerElement.textContent.split(':');
@@ -31,13 +31,29 @@ function displayWord() {
 
 function checkGameStatus() {
     if (correctCount === 5) {
-        alert('Поздравляем! Вы выиграли!');
+        clearInterval(interval);
+        alert(`Поздравляем! Вы выиграли! Время: ${format(minutes)}:${format(seconds)}`);
         resetGame();
     } else if (wrongCount === 5) {
-        alert('К сожалению, вы проиграли.');
+        clearInterval(interval);
+        alert(`К сожалению, вы проиграли. Время: ${format(minutes)}:${format(seconds)}`);
         resetGame();
     }
 }
+
+function format(time) {
+    return time < 10 ? '0' + time : time;
+}
+
+const interval = setInterval(() => {
+    seconds++;
+
+    if (seconds === 60) {
+        minutes++;
+        seconds = 0;
+    }
+    timerElement.textContent = `${format(minutes)}:${format(seconds)}`;
+}, 1000);
 
 document.addEventListener('keydown', (event) => {
     if (currentIndex < currentWord.length) {
@@ -52,57 +68,45 @@ document.addEventListener('keydown', (event) => {
         } else {
             letterSpans[currentIndex].classList.add('w');
             currentMistakes++;  
+            wordMistakesElement.textContent = currentMistakes;
         }
 
         if (currentIndex === currentWord.length) {
             if (currentMistakes === 0) {
-                correctCount++;  
+                correctCount++; 
+                correctCountElement.textContent = correctCount; 
             } else {
-                wrongCount++;    
+                wrongCount++;
+                wrongCountElement.textContent = wrongCount;    
             }
 
-            correctCountElement.textContent = correctCount;
-            wrongCountElement.textContent = wrongCount;
-            wordMistakesElement.textContent = currentMistakes;
-
-            checkGameStatus();
+            setTimeout(checkGameStatus, 0);
 
             setTimeout(() => {
                 currentIndex = 0;
                 playGame();
-            }, 1000);
+            }, 500);
         }
     }
 });
 
-function format(time) {
-    return time < 10 ? '0' + time : time;
-}
-
-const interval = setInterval(() => {
-    if (seconds > 0) {
-        seconds--;
-    } else if (minutes > 0) {
-        minutes--;
-        seconds = 59;
-    } else {
-        clearInterval(interval);
-        alert('Время истекло!');
-        return;
-    }
-    timerElement.textContent = `${format(minutes)}:${format(seconds)}`;
-}, 1000);
-
 function resetGame() {
     correctCount = 0;
+    correctCountElement.textContent = correctCount;
     wrongCount = 0;
+    wrongCountElement.textContent = wrongCount;
     currentIndex = 0;
+    currentMistakes = 0;
+    wordMistakesElement.textContent = currentMistakes;
     playGame();
 }
 
 function playGame() {
     currentWord = getRandomWord();
+    currentMistakes = 0;
+    wordMistakesElement.textContent = currentMistakes;
     displayWord();
+    
 }
 
 playGame();
